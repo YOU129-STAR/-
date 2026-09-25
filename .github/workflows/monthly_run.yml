@@ -1,0 +1,31 @@
+name: Monthly Pixiv Count Job
+
+on:
+  schedule:
+    # 毎月1日の午前9時（JST）に自動実行（UTC時間では0:00）
+    - cron: '0 0 1 * *'
+  workflow_dispatch: # 手動実行ボタンを有効化
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install gspread google-auth
+
+      - name: Run script
+        env:
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+        run: python main.py
