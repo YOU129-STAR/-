@@ -28,4 +28,5 @@ jobs:
         env:
           GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
           SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+          PIXIV_PHPSESSID: ${{ secrets.PIXIV_PHPSESSID }}
         run: python main.py
