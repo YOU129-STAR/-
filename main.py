@@ -17,15 +17,17 @@ def get_last_month_dates():
     return last_month_start.strftime("%Y-%m-%d"), last_month_end.strftime("%Y-%m-%d")
 
 def get_pixiv_count(tag, scd, ecd):
-    """Pixiv Ajax APIを使って指定期間の作品数を取得（R-18含む全年齢対象）"""
+    """Pixiv Ajax APIを使って指定期間の作品数を取得（ログイン状態のPHPSESSIDを使用）"""
     encoded_tag = urllib.parse.quote(tag)
-    # s_mode=tag に変更し、r18=1 を追加して全体件数を取得
     url = f"https://www.pixiv.net/ajax/search/artworks/{encoded_tag}?word={encoded_tag}&order=date_d&scd={scd}&ecd={ecd}&s_mode=tag&p=1&lang=ja"
+    
+    # 環境変数からPHPSESSIDを取得
+    php_sess_id = os.environ.get("PIXIV_PHPSESSID", "")
     
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         "Referer": "https://www.pixiv.net/",
-        "Cookie": "p_mngr_reg=1;" # 年齢確認用ダミークッキー
+        "Cookie": f"PHPSESSID={php_sess_id};" if php_sess_id else "p_mngr_reg=1;"
     }
     
     try:
@@ -33,7 +35,6 @@ def get_pixiv_count(tag, scd, ecd):
         with urllib.request.urlopen(req) as response:
             data = json.loads(response.read().decode('utf-8'))
             if not data.get("error"):
-                # illustManga 配下の total を取得
                 return data["body"]["illustManga"]["total"]
     except Exception as e:
         print(f"Error fetching [{tag}]: {e}")
